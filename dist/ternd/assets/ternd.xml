@@ -1,11 +1,11 @@
 <launch4jConfig>
   <headerType>gui</headerType>
-  <jar>../dist/snapd.jar</jar>
+  <jar>../dist/ternd.jar</jar>
   <dontWrapJar>false</dontWrapJar>
-  <outfile>../dist/snapd.exe</outfile>
-  <errTitle>Snap Studio</errTitle>
+  <outfile>../dist/ternd.exe</outfile>
+  <errTitle>Tern Studio</errTitle>
   <chdir>.</chdir>
-  <icon>snapd.ico</icon>
+  <icon>ternd.ico</icon>
   <restartOnCrash>true</restartOnCrash>
   <jre>
     <minVersion>1.8.0</minVersion>

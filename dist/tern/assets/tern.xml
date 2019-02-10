@@ -1,11 +1,11 @@
 <launch4jConfig>
   <headerType>gui</headerType>
-  <jar>../dist/snap.jar</jar>
+  <jar>../dist/tern.jar</jar>
   <dontWrapJar>false</dontWrapJar>
-  <outfile>../dist/snap.exe</outfile>
-  <errTitle>Snap</errTitle>
+  <outfile>../dist/tern.exe</outfile>
+  <errTitle>Tern</errTitle>
   <chdir>.</chdir>
-  <icon>snap.ico</icon>
+  <icon>tern.ico</icon>
   <restartOnCrash>true</restartOnCrash>
   <jre>
     <minVersion>1.8.0</minVersion>

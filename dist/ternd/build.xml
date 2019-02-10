@@ -1,6 +1,6 @@
-<project name="snap" default="exe" basedir=".">
+<project name="ternd" default="exe" basedir=".">
    <property name="build.dir" location="dist"/>     
-	<property name="download.dir" location="../../../snap-site/www.snapscript.org/download" />
+	<property name="download.dir" location="../../../tern-site/www.tern-lang.org/download" />
 	<property name="launch4j.dir" location="C:\Work\tools\launch4j" />
 
 	<path id="dist.classpath">
@@ -16,16 +16,17 @@
 	</target>
 
 	<target name="exe">
-		<taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask" classpath="${launch4j.dir}/launch4j.jar:${launch4j.dir}/lib/xstream.jar" />
+		<taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask" classpath="${launch4j.dir}/launch4j.jar:${launch4j.dir}/lib/xstream.jar" />      
       <delete dir="${build.dir}"/>     
       <delete file="${download.dir}/${ant.project.name}.zip"/>
-      <mkdir dir="${build.dir}"/>     
-      <copy file="${download.dir}/${ant.project.name}.jar" tofile="${build.dir}/${ant.project.name}.jar"/>      
+      <mkdir dir="${build.dir}"/>
+      <copy file="${download.dir}/${ant.project.name}.jar" tofile="${build.dir}/${ant.project.name}.jar"/>       
       <launch4j configFile="./assets/${ant.project.name}.xml" />
-      <copy file="assets/README.txt" tofile="dist/README.txt"/>
-      <zip destfile="${download.dir}/${ant.project.name}.zip" basedir="${build.dir}" includes="*.exe,*.jar,*.vim,README.txt"/>
+      <copy file="assets/ternd.ini" tofile="${build.dir}/ternd.ini"/>
+      <copy file="assets/README.txt" tofile="${build.dir}/README.txt"/>
+      <zip destfile="${download.dir}/${ant.project.name}.zip" basedir="${build.dir}" includes="*.exe,*.ini,*.vim,*.jar,README.txt"/>
       <copy file="${build.dir}/${ant.project.name}.exe" tofile="${download.dir}/${ant.project.name}.exe"/>
-      <delete dir="${build.dir}"/>       
+      <delete dir="${build.dir}"/>         
 	</target>
 
 	<target name="clean" description="clean up">
