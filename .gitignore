@@ -1,0 +1,9 @@
+.settings
+src
+maven
+target
+build
+./maven-metadata.xml
+
+.DS_Store
+pom.xml

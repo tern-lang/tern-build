@@ -1,0 +1,353 @@
+<?xml version="1.0"?>
+<project name="Snap" default="bundle-all" basedir=".">
+
+   <target name="usage">
+      <echo message="bundle-all - Packages a maven execution in to a deployable archive"/>
+   </target>
+
+   <target name="-layout">
+      <property name="root.path" value="."/>
+      <property name="source.path" value="src"/>                
+      <property name="main.source.path" value="src/main/java"/>
+      <property name="main.resource.path" value="src/main/resources"/>            
+      <property name="template.path" value="template"/> 
+      <property name="build.path" value="build"/>
+      <property name="target.path" value="target"/>    
+      <property name="maven.path" value="${root.path}/maven"/>
+      <property file="build.properties"/>
+   </target>
+
+   <target name="-clean" depends="-layout">
+      <delete dir="${build.path}"/>
+      <delete dir="${main.source.path}"/>
+   </target>
+
+   <target name="-prepare" depends="-clean">
+      <mkdir dir="${build.path}"/>
+      <mkdir dir="${maven.path}"/>
+      <mkdir dir="${main.source.path}"/>
+      <exec dir="${snap.root}/snap" executable="${maven.exe}">
+         <arg value="clean"/>
+         <arg value="install"/>
+      </exec>
+      <exec dir="${snap.root}/snap-external" executable="${maven.exe}">
+         <arg value="clean"/>
+         <arg value="install"/>
+      </exec>
+      <exec dir="${snap.root}/snap-develop" executable="${maven.exe}">
+         <arg value="clean"/>
+         <arg value="install"/>
+      </exec>            
+   </target>
+
+   <target name="-bundle" depends="-clean">
+      <delete dir="${maven.path}/${snap.artifact}"/>       
+      <mkdir dir="${maven.path}/${snap.artifact}"/>
+      <mkdir dir="${maven.path}/${snap.artifact}/${snap.version}"/>
+      <copy todir="${maven.path}/${snap.artifact}/${snap.version}">
+         <fileset dir="${target.path}">
+            <include name="${snap.artifact}-${snap.version}.jar"/>
+            <include name="${snap.artifact}-${snap.version}-sources.jar"/>
+            <include name="${snap.artifact}-${snap.version}-javadoc.jar"/>
+         </fileset>
+      </copy>       
+      <get dest="${target.path}">
+         <url url="https://repo.maven.apache.org/maven2/org/snapscript/snap/maven-metadata.xml"/>
+      </get>
+      <replace file="${target.path}/maven-metadata.xml">
+         <replacetoken><![CDATA[</versions>]]></replacetoken>
+         <replacevalue><![CDATA[  <version>@snap.version@</version>
+    </versions>]]></replacevalue>
+      </replace> 
+      <replace file="${target.path}/maven-metadata.xml">
+         <replacetoken><![CDATA[<artifactId>snap</artifactId>]]></replacetoken>
+         <replacevalue><![CDATA[<artifactId>@snap.artifact@</artifactId>]]></replacevalue>
+      </replace>       
+      <replaceregexp match="&lt;latest&gt;[0-9\.]+&lt;/latest&gt;" replace="&lt;latest&gt;@snap.version@&lt;/latest&gt;" flags="g" byline="true">
+         <fileset dir="${target.path}">
+            <include name="maven-metadata.xml"/>
+         </fileset>
+      </replaceregexp>
+      <replaceregexp match="&lt;release&gt;[0-9\.]+&lt;/release&gt;" replace="&lt;release&gt;@snap.version@&lt;/release&gt;" flags="g" byline="true">
+         <fileset dir="${target.path}">
+            <include name="maven-metadata.xml"/>
+         </fileset>
+      </replaceregexp>
+      <replaceregexp match="&lt;artifactId&gt;[0-9\.]+&lt;/artifactId&gt;" replace="&lt;artifactId&gt;@snap.version@&lt;/artifactId&gt;" flags="g" byline="true">
+         <fileset dir="${target.path}">
+            <include name="maven-metadata.xml"/>
+         </fileset>
+      </replaceregexp>      
+      <copy todir="${maven.path}/${snap.artifact}" overwrite="true">
+         <fileset dir="${target.path}">
+            <include name="maven-metadata.xml"/>
+         </fileset>
+         <filterset>
+            <filter token="snap.artifact" value="${snap.artifact}"/>
+            <filtersfile file="${root.path}/build.properties"/>
+         </filterset>
+      </copy>
+      <move file="${root.path}/pom.xml" tofile="${maven.path}/${snap.artifact}/${snap.version}/${snap.artifact}-${snap.version}.pom"/>
+      <exec executable="gpg">
+         <arg value="-ab"/>
+         <arg value="--default-key"/>
+         <arg value="798A473A"/>
+         <arg value="--passphrase"/>
+         <arg value="${gpg.password}"/>
+         <arg value="${maven.path}/${snap.artifact}/${snap.version}/${snap.artifact}-${snap.version}.jar"/>
+      </exec>
+      <exec executable="gpg">
+         <arg value="-ab"/>
+         <arg value="--default-key"/>
+         <arg value="798A473A"/>
+         <arg value="--passphrase"/>
+         <arg value="${gpg.password}"/>
+         <arg value="${maven.path}/${snap.artifact}/${snap.version}/${snap.artifact}-${snap.version}-sources.jar"/>
+      </exec>
+      <exec executable="gpg">
+         <arg value="-ab"/>
+         <arg value="--default-key"/>
+         <arg value="798A473A"/>
+         <arg value="--passphrase"/>
+         <arg value="${gpg.password}"/>
+         <arg value="${maven.path}/${snap.artifact}/${snap.version}/${snap.artifact}-${snap.version}-javadoc.jar"/>
+      </exec>
+      <exec executable="gpg">
+         <arg value="-ab"/>
+         <arg value="--default-key"/>
+         <arg value="798A473A"/>
+         <arg value="--passphrase"/>
+         <arg value="${gpg.password}"/>
+         <arg value="${maven.path}/${snap.artifact}/${snap.version}/${snap.artifact}-${snap.version}.pom"/>
+      </exec>
+      <zip destfile="${maven.path}/${snap.artifact}-maven-${snap.version}.zip" basedir="${maven.path}/${snap.artifact}"/>      
+      <jar destfile="${maven.path}/${snap.artifact}/bundle-${snap.version}.jar" basedir="${maven.path}/${snap.artifact}/${snap.version}"/>
+   </target>
+   
+      
+   <target name="-bundle-snap" depends="-layout">
+      <delete dir="${main.source.path}"/>
+      <mkdir dir="${main.source.path}"/>
+      <copy todir="${root.path}" overwrite="true">
+         <fileset dir="${template.path}">
+            <include name="pom.xml"/>
+         </fileset>
+         <filterset>
+            <filter token="snap.artifact" value="snap"/>
+            <filter token="snap.deps" value=""/>
+            <filter token="snap.name" value="Snap"/>
+            <filter token="snap.repo" value="snap"/>
+            <filtersfile file="${root.path}/build.properties"/>
+         </filterset>
+      </copy>
+      <copy todir="${main.source.path}" overwrite="true">
+        <fileset dir="${snap.root}/snap/snap-compile/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>              
+        <fileset dir="${snap.root}/snap/snap-tree/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${snap.root}/snap/snap-common/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${snap.root}/snap/snap-parse/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${snap.root}/snap/snap-core/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+      </copy>
+      <copy todir="${main.resource.path}" overwrite="true">
+        <fileset dir="${snap.root}/snap/snap-parse/src/main/resources">
+          <include name="**/*.txt"/>
+        </fileset>
+      </copy>
+      <copy todir="${main.resource.path}" overwrite="true">
+        <fileset dir="${snap.root}/snap/snap-core/src/main/resources">
+          <include name="**/*.txt"/>
+        </fileset>
+      </copy>
+      <exec executable="${maven.exe}">
+        <arg value="clean"/>
+        <arg value="install"/>
+      </exec>
+      <antcall target="-bundle">
+        <param name="snap.artifact" value="snap"/>   
+      </antcall>
+   </target>
+
+   <target name="-bundle-snap-android" depends="-layout">
+      <delete dir="${main.source.path}"/>
+      <mkdir dir="${main.source.path}"/>
+      <copy todir="${root.path}" overwrite="true">
+         <fileset dir="${template.path}">
+            <include name="pom.xml"/>
+         </fileset>
+         <filterset>
+            <filter token="snap.artifact" value="snap-android"/>
+            <filter token="snap.deps" value="&lt;dependencies&gt;&lt;dependency&gt;&lt;groupId&gt;org.snapscript&lt;/groupId&gt;&lt;artifactId&gt;snap&lt;/artifactId&gt;&lt;version&gt;${snap.version}&lt;/version&gt;&lt;/dependency&gt;&lt;/dependencies&gt;"/>
+            <filter token="snap.name" value="Snap Android"/>
+            <filter token="snap.repo" value="snap-external"/>
+            <filtersfile file="${root.path}/build.properties"/>
+         </filterset>
+      </copy>
+      <copy todir="${main.source.path}" overwrite="true">
+        <fileset dir="${snap.root}/snap-external/snap-dx/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${snap.root}/snap-external/snap-platform/src/main/java">
+          <include name="**/*.java"/>
+          <exclude name="**/standard/**"/>
+        </fileset>
+      </copy>
+      <exec executable="${maven.exe}">
+         <arg value="clean"/>
+         <arg value="install"/>
+      </exec>
+      <antcall target="-bundle">
+        <param name="snap.artifact" value="snap-android"/>   
+      </antcall>            
+   </target>  
+
+   <target name="-bundle-snap-agent" depends="-layout">
+      <delete dir="${main.source.path}"/>
+      <mkdir dir="${main.source.path}"/>
+      <copy todir="${root.path}" overwrite="true">
+         <fileset dir="${template.path}">
+            <include name="pom.xml"/>
+         </fileset>
+         <filterset>
+            <filter token="snap.artifact" value="snap-agent"/>
+            <filter token="snap.deps" value="&lt;dependencies&gt;&lt;dependency&gt;&lt;groupId&gt;org.snapscript&lt;/groupId&gt;&lt;artifactId&gt;snap&lt;/artifactId&gt;&lt;version&gt;${snap.version}&lt;/version&gt;&lt;/dependency&gt;&lt;/dependencies&gt;"/> 
+            <filter token="snap.name" value="Snap Agent"/>
+            <filter token="snap.repo" value="snap-develop"/>
+            <filtersfile file="${root.path}/build.properties"/>
+         </filterset>
+      </copy>
+      <copy todir="${main.source.path}" overwrite="true">
+        <fileset dir="${snap.root}/snap-develop/snap-studio-agent/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+      </copy>
+      <exec executable="${maven.exe}">
+         <arg value="clean"/>
+         <arg value="install"/>
+      </exec>
+      <antcall target="-bundle">
+        <param name="snap.artifact" value="snap-agent"/>   
+      </antcall>            
+   </target>   
+   
+   <target name="-bundle-snap-external" depends="-layout">
+      <delete dir="${main.source.path}"/>
+      <mkdir dir="${main.source.path}"/>
+      <copy todir="${root.path}" overwrite="true">
+         <fileset dir="${template.path}">
+            <include name="pom.xml"/>
+         </fileset>
+         <filterset>
+            <filter token="snap.artifact" value="snap-external"/>
+            <filter token="snap.deps" value="&lt;dependencies&gt;&lt;dependency&gt;&lt;groupId&gt;org.snapscript&lt;/groupId&gt;&lt;artifactId&gt;snap&lt;/artifactId&gt;&lt;version&gt;${snap.version}&lt;/version&gt;&lt;/dependency&gt;&lt;/dependencies&gt;"/>
+            <filter token="snap.name" value="Snap External"/>
+            <filter token="snap.repo" value="snap-external"/>
+            <filtersfile file="${root.path}/build.properties"/>
+         </filterset>
+      </copy>
+      <copy todir="${main.source.path}" overwrite="true">
+        <fileset dir="${snap.root}/snap-external/snap-platform/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${snap.root}/snap-external/snap-dx/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${snap.root}/snap-external/snap-asm/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${snap.root}/snap-external/snap-cglib/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>   
+      </copy>
+      <exec executable="${maven.exe}">
+         <arg value="clean"/>
+         <arg value="install"/>
+      </exec>
+      <antcall target="-bundle">
+        <param name="snap.artifact" value="snap-external"/>   
+      </antcall>            
+   </target>  
+ 
+   <target name="-bundle-snap-all" depends="-layout">
+      <delete dir="${main.source.path}"/>
+      <mkdir dir="${main.source.path}"/>
+      <copy todir="${root.path}" overwrite="true">
+         <fileset dir="${template.path}">
+            <include name="pom.xml"/>
+         </fileset>
+         <filterset>
+            <filter token="snap.artifact" value="snap-all"/>
+            <filter token="snap.name" value="Snap All"/>
+            <filter token="snap.repo" value="snap"/>
+            <filter token="snap.deps" value=""/>
+            <filtersfile file="${root.path}/build.properties"/>
+         </filterset>
+      </copy>
+      <copy todir="${main.source.path}" overwrite="true">
+        <fileset dir="${snap.root}/snap/snap-compile/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>              
+        <fileset dir="${snap.root}/snap/snap-tree/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${snap.root}/snap/snap-common/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${snap.root}/snap/snap-parse/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${snap.root}/snap/snap-core/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${snap.root}/snap-develop/snap-studio-agent/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${snap.root}/snap-external/snap-dx/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${snap.root}/snap-external/snap-platform/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${snap.root}/snap-external/snap-asm/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${snap.root}/snap-external/snap-cglib/src/main/java">
+          <include name="**/*.java"/>
+        </fileset>                
+      </copy>
+      <copy todir="${main.resource.path}" overwrite="true">
+        <fileset dir="${snap.root}/snap/snap-parse/src/main/resources">
+          <include name="**/*.txt"/>
+        </fileset>
+      </copy>
+      <copy todir="${main.resource.path}" overwrite="true">
+        <fileset dir="${snap.root}/snap/snap-core/src/main/resources">
+          <include name="**/*.txt"/>
+        </fileset>
+      </copy>
+      <exec executable="${maven.exe}">
+         <arg value="clean"/>
+         <arg value="install"/>
+      </exec>
+      <antcall target="-bundle">
+        <param name="snap.artifact" value="snap-all"/>   
+      </antcall>            
+   </target>   
+   
+   <target name="bundle-all" depends="-prepare">
+      <antcall target="-bundle-snap"/>
+      <antcall target="-bundle-snap-agent"/>
+      <antcall target="-bundle-snap-android"/>
+      <antcall target="-bundle-snap-external"/>
+      <antcall target="-bundle-snap-all"/>            
+   </target>
+
+</project>

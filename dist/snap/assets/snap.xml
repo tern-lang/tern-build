@@ -1,0 +1,13 @@
+<launch4jConfig>
+  <headerType>gui</headerType>
+  <jar>../dist/snap.jar</jar>
+  <dontWrapJar>false</dontWrapJar>
+  <outfile>../dist/snap.exe</outfile>
+  <errTitle>Snap</errTitle>
+  <chdir>.</chdir>
+  <icon>snap.ico</icon>
+  <restartOnCrash>true</restartOnCrash>
+  <jre>
+    <minVersion>1.8.0</minVersion>
+  </jre>
+</launch4jConfig>
