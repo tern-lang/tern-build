@@ -1,6 +1,6 @@
 <project name="tern" default="exe" basedir=".">
    <property name="build.dir" location="dist"/>     
-	<property name="download.dir" location="../../../tern-site/www.tern-lang.org/download" />
+	<property name="download.dir" location="../../../tern-site/tern-lang.org/download" />
 	<property name="launch4j.dir" location="C:\Work\tools\launch4j" />
 
 	<path id="dist.classpath">
