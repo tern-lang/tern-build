@@ -2,19 +2,19 @@
 
 Build for Maven Central.
 
-# List GPG keys
+### List GPG keys
 
 gpg --list-key
 
-# Generate a GPG key
+### Generate a GPG key
 
 gpg --gen-key
 
-# Use GPG to signe a file
+### Use GPG to signe a file
 
 gpg -ab --default-key 798A473A  --passphrase <password> <file>
 
-# Details
+### Details
 
 This should be run on Linux/Mac for gpg
 
