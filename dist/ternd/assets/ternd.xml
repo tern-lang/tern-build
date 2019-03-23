@@ -4,9 +4,8 @@
   <dontWrapJar>false</dontWrapJar>
   <outfile>../dist/ternd.exe</outfile>
   <errTitle>Tern Studio</errTitle>
-  <chdir>.</chdir>
   <icon>ternd.ico</icon>
-  <restartOnCrash>true</restartOnCrash>
+  <restartOnCrash>false</restartOnCrash>
   <jre>
     <minVersion>1.8.0</minVersion>
   </jre>

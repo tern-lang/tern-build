@@ -1,12 +1,11 @@
 <launch4jConfig>
-  <headerType>gui</headerType>
+  <headerType>console</headerType>
   <jar>../dist/tern.jar</jar>
   <dontWrapJar>false</dontWrapJar>
   <outfile>../dist/tern.exe</outfile>
   <errTitle>Tern</errTitle>
-  <chdir>.</chdir>
   <icon>tern.ico</icon>
-  <restartOnCrash>true</restartOnCrash>
+  <restartOnCrash>false</restartOnCrash>
   <jre>
     <minVersion>1.8.0</minVersion>
   </jre>
