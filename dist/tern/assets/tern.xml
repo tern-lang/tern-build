@@ -7,6 +7,7 @@
   <icon>tern.ico</icon>
   <restartOnCrash>false</restartOnCrash>
   <jre>
-    <minVersion>1.8.0</minVersion>
+     <minVersion>1.8.0</minVersion>
+     <opt>-XX:+IgnoreUnrecognizedVMOptions --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED</opt>          
   </jre>
 </launch4jConfig>
