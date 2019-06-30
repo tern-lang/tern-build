@@ -1,0 +1,13 @@
+<launch4jConfig>
+  <headerType>gui</headerType>
+  <jar>ternd.jar</jar>
+  <dontWrapJar>true</dontWrapJar>
+  <outfile>../dist/ternd.exe</outfile>
+  <errTitle>Tern Studio</errTitle>
+  <icon>ternd.ico</icon>
+  <restartOnCrash>false</restartOnCrash>
+  <jre>
+     <minVersion>1.8.0</minVersion>
+     <opt>-XX:+IgnoreUnrecognizedVMOptions --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED "-Djava.library.path=%HOMEDRIVE%%HOMEPATH%\.tern\cef\3.3538.1852.gcb937fc" -Dorg.ternlang.studio.allowFork=false</opt>          
+  </jre>
+</launch4jConfig>
