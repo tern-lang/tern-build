@@ -4,6 +4,7 @@ maven
 target
 build
 ./maven-metadata.xml
-
+.vagrant
+demo/.vagrant
 .DS_Store
 pom.xml
