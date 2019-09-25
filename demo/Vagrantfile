@@ -6,6 +6,7 @@
    config.vm.box = "centos/7"
    config.vm.hostname = "myhost"
    config.vm.network "private_network", ip: "192.168.50.10"
+   config.vm.network "forwarded_port", guest: 4457, host: 4457
    config.vm.provision "shell", inline: <<-SHELL
       set -x
       sudo yum -y update
@@ -15,6 +16,6 @@
       git clone https://github.com/tern-lang/tern-demo.git
       curl -O http://tern-lang.org/download/ternd-linux.tar.gz
       tar -xzvf ternd-linux.tar.gz
-      java -jar ternd.jar --server-only=true --directory=$PWD/tern-demo --port=4457
+      nohup java -XX:+IgnoreUnrecognizedVMOptions --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED -jar ternd.jar --server-only=true --directory=$PWD/tern-demo --port=4457 > out.log &
    SHELL
  end
